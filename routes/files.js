@@ -84,4 +84,4 @@ router.post('/:fileId/notes', requireAuth, requirePlan('pro'), async (req, res, 
   res.json({ queued: true, skill: 'ai_notes' });
 });
 
-module.exports = router;\
+module.exports = router;
