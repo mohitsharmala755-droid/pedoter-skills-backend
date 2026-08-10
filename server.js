@@ -7,10 +7,12 @@ const rateLimit = require('express-rate-limit');
 
 const razorpayRoutes = require('./routes/razorpay');
 const filesRoutes = require('./routes/files');
+const earnhubRoutes = require('./routes/earnhub');
 
 const app = express();
 
 app.use(helmet());
+app.set('trust proxy', 1);
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
@@ -23,6 +25,7 @@ app.use(express.json());
 
 app.use('/api/razorpay', razorpayRoutes);
 app.use('/api/files', filesRoutes);
+app.use('/api/earnhub', earnhubRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
