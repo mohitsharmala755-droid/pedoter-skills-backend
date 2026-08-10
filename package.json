@@ -1,24 +1,38 @@
-{
-  "name": "pedoter-skills-backend",
-  "version": "1.0.0",
-  "private": true,
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0",
-    "helmet": "^7.1.0",
-    "multer": "^1.4.5-lts.1",
-    "razorpay": "^2.9.4",
-    "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
-  }
-}
+// backend/server.js
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+const razorpayRoutes = require('./routes/razorpay');
+const filesRoutes = require('./routes/files');
+const earnhubRoutes = require('./routes/earnhub');
+
+const app = express();
+
+app.use(helmet());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
+
+// IMPORTANT: the Razorpay webhook needs the raw body for signature verification,
+// so it must be mounted BEFORE express.json().
+app.use('/api/razorpay/webhook', express.raw({ type: 'application/json' }));
+app.use('/api/razorpay/webhook', razorpayRoutes);
+
+app.use(express.json());
+
+app.use('/api/razorpay', razorpayRoutes);
+app.use('/api/files', filesRoutes);
+app.use('/api/earnhub', earnhubRoutes);
+
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Central error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`Pedoter Skills API running on port ${PORT}`));
