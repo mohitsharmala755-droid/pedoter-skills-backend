@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const razorpayRoutes = require('./routes/razorpay');
 const filesRoutes = require('./routes/files');
 const earnhubRoutes = require('./routes/earnhub');
+const resumeRoutes = require('./routes/resume');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use('/api/razorpay', razorpayRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/earnhub', earnhubRoutes);
+app.use('/api/resume', resumeRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
